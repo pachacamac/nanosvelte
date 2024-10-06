@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="https://github.com/pachacamac">
+<title>NanoSvelte</title>
+<style>
+  body{ background: #222; color: #ddd; }
+</style>
+</head>
+<body>
+    <template type="component" name="otp-entry">
+        <div class="wrapper">
+            <div class="inputs">
+                <input type="text" id="n1" class="input" autocomplete="off">
+                <input type="text" id="n2" class="input" autocomplete="off">
+                <input type="text" id="n3" class="input" autocomplete="off">
+                <span class="separator">&mdash;</span>
+                <input type="text" id="n4" class="input" autocomplete="off">
+                <input type="text" id="n5" class="input" autocomplete="off">
+                <input type="text" id="n6" class="input" autocomplete="off">
+                <input type="submit" id="submit" value="submit">
+            </div>
+        </div>
+    
+        <script>
+            doc.querySelectorAll('.input').forEach(input => {
+                input.addEventListener('input', () => {
+                    input.value = input.value.replace(/\D/g, '');
+                    if (input.value.length === 1) {
+                        B.emit('digit-entered', input.value);
+                        let nextInput = input.nextElementSibling;
+                        while (nextInput && nextInput.tagName !== 'INPUT') nextInput = nextInput.nextElementSibling;
+                        if (nextInput) nextInput.focus();
+                    }
+                });
+            });
+    
+            $.submit.addEventListener('click', () => {
+                B.emit('otp-submitted', [$.n1.value, $.n2.value, $.n3.value, $.n4.value, $.n5.value, $.n6.value].join(''));
+            });
+        </script>
+    
+        <style>
+            .wrapper {
+                display: inline-block;
+            }
+            .inputs {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 10px;
+            }
+            .input {
+                width: 1em;
+                height: 1em;
+                text-align: center;
+            }
+        </style>
+    </template>
+
+    <template type="component" name="otp-status">
+        <div class="status" id="testing">
+            <span id="status"></span>
+        </div>
+
+        <script>
+            B.on('digit-entered', (digit)=>{
+                $.status.textContent = digit;
+            });
+            B.on('otp-submitted', (code)=>{
+                $.status.textContent = code;
+            });
+        </script>
+
+        <style>
+            .status {
+                display: block;
+                padding: 10px;
+                background: #444;
+                color: #eee;
+            }
+        </style>
+    </template>
+
+    <otp-entry></otp-entry>
+    <otp-status></otp-status>
+
+    <script type="module">
+        import {S} from './NanoSvelte.js';
+        S();
+    </script>
+</body>
+</html>
